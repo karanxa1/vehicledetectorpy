@@ -114,7 +114,7 @@ pip install -r requirements.txt
 
 ## 👨‍💻 Author
 Developed by **karan rajput** 🚀  
-For questions, contact: [karanravirajput@gmail.com]
+For questions, contact: karanravirajput@gmail.com
 
 ---
 
