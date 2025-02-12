@@ -113,8 +113,8 @@ pip install -r requirements.txt
 ---
 
 ## 👨‍💻 Author
-Developed by **[Your Name]** 🚀  
-For questions, contact: [your_email@example.com]
+Developed by **karan rajput** 🚀  
+For questions, contact: [karanravirajput@gmail.com]
 
 ---
 
