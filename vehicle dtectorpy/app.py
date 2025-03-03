@@ -1,51 +1,63 @@
-from flask import Flask, render_template, request, send_from_directory, url_for
-from werkzeug.utils import secure_filename
-from flask_cors import CORS
+from flask import Flask, render_template, request, send_from_directory
 import os
-from detect import detect_vehicles  # Import the updated function
+import uuid
+import threading
+from werkzeug.utils import secure_filename
+# Import detect_vehicles directly, not through import statement
+from detect import detect_vehicles
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-UPLOAD_FOLDER = 'static/'  # Directory to store videos
+UPLOAD_FOLDER = "static/uploaded_videos"
+OUTPUT_FOLDER = "static/processed_videos"
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER
 
-# Ensure upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Ensure directories exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/')
-def upload_form():
-    return render_template('upload.html', processed_video=None)
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-@app.route('/upload', methods=['POST'])
-def upload_video():
-    if 'file' not in request.files:
-        return "No file uploaded!", 400
+@app.route("/upload", methods=["POST"])
+def upload():
+    if "file" not in request.files:
+        return "No file uploaded", 400
     
-    file = request.files['file']
-    if file.filename == '':
-        return "No selected file!", 400
+    file = request.files["file"]
+    if file.filename == "":
+        return "No selected file", 400
     
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        processed_path = os.path.join(app.config['UPLOAD_FOLDER'], 'processed_video.mp4')
-        
-        file.save(input_path)  # Save original video
-        detect_vehicles(input_path, processed_path)  # Process video for vehicle detection
-        
-        return render_template('upload.html', processed_video=url_for('serve_video', filename='processed_video.mp4'))
-    else:
-        return "Invalid file type!", 400
+    if not allowed_file(file.filename):
+        return f"File type not allowed. Please upload: {', '.join(ALLOWED_EXTENSIONS)}", 400
+    
+    # Create a unique filename to avoid conflicts
+    filename = secure_filename(file.filename)
+    unique_filename = f"{uuid.uuid4()}_{filename}"
+    video_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
+    output_filename = f"processed_{unique_filename}"
+    output_path = os.path.join(app.config["OUTPUT_FOLDER"], output_filename)
+    
+    # Save the uploaded file
+    file.save(video_path)
+    
+    # Process the video
+    detect_vehicles(video_path, output_path)
+    
+    # Create a relative path for the template
+    relative_output_path = f"processed_videos/{output_filename}"
+    
+    return render_template("result.html", processed_video=relative_output_path)
 
-@app.route('/video/<filename>')
-def serve_video(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype='video/mp4')
+@app.route("/processed_videos/<filename>")
+def processed_video(filename):
+    return send_from_directory(app.config["OUTPUT_FOLDER"], filename)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
