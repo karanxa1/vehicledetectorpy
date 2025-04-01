@@ -8,8 +8,10 @@ from detect import detect_vehicles
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "static/uploaded_videos"
-OUTPUT_FOLDER = "static/processed_videos"
+# Define folders with absolute paths for PythonAnywhere compatibility
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "../static/uploaded_videos")
+OUTPUT_FOLDER = os.path.join(BASE_DIR, "../static/processed_videos")
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER

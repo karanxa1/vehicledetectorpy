@@ -5,9 +5,16 @@ import cv2
 from detect import detect_vehicles
 from werkzeug.utils import secure_filename
 
-# Define upload and output folders
-UPLOAD_FOLDER = "static/uploaded_videos"
-OUTPUT_FOLDER = "static/processed_videos"
+# Define upload and output folders with absolute paths for PythonAnywhere compatibility
+import sys
+import os.path
+
+# Get the absolute path of the current directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define folders with absolute paths
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "../static/uploaded_videos")
+OUTPUT_FOLDER = os.path.join(BASE_DIR, "../static/processed_videos")
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
 
 # Ensure directories exist
@@ -114,4 +121,8 @@ if __name__ == "__main__":
     print("✅ System is ready! Launching web interface...\n")
     
     # Launch the Gradio interface
-    demo.launch(share=False, server_name="127.0.0.1")
+    # For local development use:
+    # demo.launch(share=False, server_name="127.0.0.1")
+    
+    # For PythonAnywhere deployment, use this configuration:
+    demo.launch(server_name="0.0.0.0", server_port=8000)

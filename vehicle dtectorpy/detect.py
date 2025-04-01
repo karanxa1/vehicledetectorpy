@@ -1,9 +1,14 @@
 import torch
 import cv2
 import numpy as np
+import os
 
-# Load YOLOv5 model
-model = torch.hub.load("ultralytics/yolov5", "custom", path="yolov5s.pt", force_reload=True)
+# Get the absolute path of the current directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Load YOLOv5 model with absolute path
+model_path = os.path.join(BASE_DIR, "yolov5s.pt")
+model = torch.hub.load("ultralytics/yolov5", "custom", path=model_path, force_reload=True)
 
 # Class labels for vehicle detection (adjust as per YOLOv5 model)
 VEHICLE_CLASSES = {"car", "truck", "bus", "motorcycle", "bicycle"}
